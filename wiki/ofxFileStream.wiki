@@ -1,0 +1,3 @@
+A way to see if new files have been added to a directory at a set interval. If a new file was found a event is broadcasted with the name and path and id of the file. 
+
+This addon requires ofxDirlList and ofxTimer alos OF with poco enabled. 
