@@ -5,6 +5,7 @@ ofxFileStream::ofxFileStream() {
 	bSearching  = false;
 	bAllocated  = false;
 	fileIDCount = 0;
+	numFiles    = 0;
 }
 ofxFileStream::~ofxFileStream() {
 	files.clear();
@@ -12,10 +13,10 @@ ofxFileStream::~ofxFileStream() {
 }
 
 // ---------------------------------------
-void ofxFileStream::setup(string path, float seconds) {
+void ofxFileStream::setupFileStream(string path, float seconds) {
 	
 	folderPath  = path;
-	timer.setup(seconds);
+	timer.setup(seconds, true);
 	
 	//events
 	ofAddListener(timer.TIMER_REACHED, this, &ofxFileStream::checkForNewFiles);	
@@ -30,13 +31,21 @@ void ofxFileStream::setTimer(float seconds) {
 
 // ---------------------------------------
 void ofxFileStream::checkForNewFiles(ofEventArgs &e) {
-
+	
 	if(!bSearching) {
-		bSearching = true;
-		int numFiles = listDir(folderPath);
 		
-		if(numFiles) {
-			for(int i=0; i<numFiles; i++) {
+		bSearching = true;
+		
+		int numFilesFound = listDir(folderPath);
+		
+		if(numFilesFound == -1) {
+			printf("--- We lost the path connection ---\n");	
+			printf("--- path:%s\n ---\n", folderPath.c_str());
+			reset();
+			return;
+		}
+		if(numFilesFound) {
+			for(int i=0; i<numFilesFound; i++) {
 				
 				bool fileFound = false;
 				for(int j=0; j<files.size(); j++) {
@@ -52,11 +61,12 @@ void ofxFileStream::checkForNewFiles(ofEventArgs &e) {
 					fileEventArgs.name = getName(i);
 					fileEventArgs.path = getPath(i);
 					fileEventArgs.id   = fileIDCount;
+					fileEventArgs.totalPhotos = numFiles;
 					ofNotifyEvent(FILE_FOUND, fileEventArgs, this);
 					
 					fileIDCount ++;
+					numFiles ++;
 				}
-				
 			}
 			
 			//debug

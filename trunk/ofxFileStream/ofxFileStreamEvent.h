@@ -6,4 +6,5 @@ public:
 	int		id;
 	string	name;
 	string	path;
+	int		totalPhotos;
 };
