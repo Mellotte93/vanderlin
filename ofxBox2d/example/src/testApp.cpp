@@ -23,6 +23,23 @@ void testApp::setup() {
 	box2d.setFPS(30.0);
 	
 	
+	// the joints
+	for(int i=0; i<5; i++) {
+		float x = (ofGetWidth()/2) + cos(i) * 50; 
+		float y = (ofGetHeight()/2) + sin(i) * 50;
+		ballJoints[i].setPhysics(3.0, 0.53, 0.1);
+		ballJoints[i].setup(box2d.getWorld(), x, y, 10);		
+	}
+	// connect all the ball joints
+	for(int i=1; i<5; i++) {
+		joints[i].setWorld(box2d.getWorld());
+		joints[i].addJoint(ballJoints[i].body, ballJoints[i-1].body, 3.0, 0.5);
+		if(i == 4) {
+			joints[0].setWorld(box2d.getWorld());
+			joints[0].addJoint(ballJoints[4].body, ballJoints[0].body, 3.0, 0.5);
+		}
+	}
+		
 	
 }
 
@@ -66,10 +83,11 @@ void testApp::draw() {
 	for(int i=0; i<lines.size(); i++) {
 		lines[i].draw();
 	}
+
 	
-	for(int i=0; i<customParticles.size(); i++) {
-		customParticles[i].draw();
-	}
+	
+	for(int i=0; i<5; i++) ballJoints[i].draw();
+	for(int i=0; i<5; i++) joints[i].draw();
 	
 	lineStrip.draw();
 	box2d.draw();
@@ -81,10 +99,11 @@ void testApp::draw() {
 	string info = "";
 	info += "Press [s] to draw a line strip ["+ofToString(bDrawLines)+"]\n"; 
 	info += "Press [f] to toggle Mouse Force ["+ofToString(bMouseForce)+"]\n"; 
-	
 	info += "Press [c] for circles\n";
 	info += "Press [b] for circles\n";
 	info += "Press [z] for custom particle\n";
+	info += "Total Bobies: "+ofToString(box2d.getBodyCount())+"\n";
+	info += "Total Joints: "+ofToString(box2d.getJointCount())+"\n\n";
 	info += "FPS: "+ofToString(ofGetFrameRate())+"\n";
 	ofSetColor(255, 255, 255);
 	ofDrawBitmapString(info, 30, 30);
