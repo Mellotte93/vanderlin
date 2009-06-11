@@ -17,7 +17,8 @@ private:
 	
 public:
 	
-	bool							bAllocated;
+	int									numFiles;
+	bool								bAllocated;
 	ofEvent <ofxFileStreamEventArgs>	FILE_FOUND;
 	
 	// ---------------------------------------
@@ -25,10 +26,10 @@ public:
 	~ofxFileStream();
 	
 	// ---------------------------------------
-	void setup(string path, float seconds);
+	void setupFileStream(string path, float seconds);
 	void setTimer(float seconds);
 	void draw(float x, float y);
-
+	
 	// ---------------------------------------
 	void setPath(string p);
 	void checkForNewFiles(ofEventArgs &e);
