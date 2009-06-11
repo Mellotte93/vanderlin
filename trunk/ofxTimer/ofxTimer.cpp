@@ -10,9 +10,9 @@ ofxTimer::~ofxTimer() {
 
 // ---------------------------------------
 
-void ofxTimer::setup(float seconds) {
+void ofxTimer::setup(float seconds, bool loopTimer) {
 	
-	bLoop		= true;
+	bLoop		= loopTimer;
 	bPauseTimer = false;
 	
 	//timer
@@ -44,7 +44,8 @@ void ofxTimer::update(ofEventArgs &e) {
 		if(time >= delay) {
 			if(!bLoop) bPauseTimer = true;
 			bStartTimer = true;
-			ofNotifyEvent(TIMER_REACHED, e, this);
+			static ofEventArgs timerEventArgs;
+			ofNotifyEvent(TIMER_REACHED, timerEventArgs, this);
 		}
 	}
 }

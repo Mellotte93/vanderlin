@@ -23,7 +23,7 @@ public:
 	~ofxTimer();
 	
 	// ---------------------------------------
-	void setup(float seconds);
+	void setup(float seconds, bool loopTimer);
 	//void draw();
 	
 	// ---------------------------------------
