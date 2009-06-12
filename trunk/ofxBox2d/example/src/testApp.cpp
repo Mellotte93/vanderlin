@@ -26,7 +26,7 @@ void testApp::setup() {
 	// the joints
 	for(int i=0; i<5; i++) {
 		float x = (ofGetWidth()/2) + cos(i) * 50; 
-		float y = (ofGetHeight()/2) + sin(i) * 50;
+		float y = (50) + sin(i) * 50;
 		ballJoints[i].setPhysics(3.0, 0.53, 0.1);
 		ballJoints[i].setup(box2d.getWorld(), x, y, 10);		
 	}
@@ -39,7 +39,20 @@ void testApp::setup() {
 			joints[0].addJoint(ballJoints[4].body, ballJoints[0].body, 3.0, 0.5);
 		}
 	}
-		
+	
+	// lets draw a simple wave
+	ofPoint p;
+	float y = 0;
+	lineStrip.setWorld(box2d.getWorld());
+	lineStrip.clear();
+	for(int i=0; i<50; i++) {
+		p.x += 18;
+		p.y += cos(y)*ofRandom(10, 40);
+		y += i * ofRandom(10, 30);
+
+		lineStrip.addPoint(30+p.x, (ofGetHeight()/2)+p.y);
+	}
+	lineStrip.createShape();
 	
 }
 
