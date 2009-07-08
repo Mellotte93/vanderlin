@@ -4,6 +4,8 @@
 ofxFileStream::ofxFileStream() {
 	bSearching  = false;
 	bAllocated  = false;
+	bVerbose    = false;
+	
 	fileIDCount = 0;
 	numFiles    = 0;
 }
@@ -45,6 +47,7 @@ void ofxFileStream::checkForNewFiles(ofEventArgs &e) {
 			return;
 		}
 		if(numFilesFound) {
+			
 			for(int i=0; i<numFilesFound; i++) {
 				
 				bool fileFound = false;
@@ -53,8 +56,8 @@ void ofxFileStream::checkForNewFiles(ofEventArgs &e) {
 				}
 				
 				
-				//if we found the file in the files
-				//vector the do not add it else add it
+				// if we found the file in the files
+				// vector the do not add it else add it
 				if(!fileFound) {
 					files.push_back(getName(i));
 					static ofxFileStreamEventArgs fileEventArgs;
@@ -70,16 +73,18 @@ void ofxFileStream::checkForNewFiles(ofEventArgs &e) {
 			}
 			
 			//debug
-			debugText = "";
-			debugText += "\nFiles Array\n";
-			debugText += "------------------------------\n";
-			for(int j=0; j<files.size(); j++) {
-				debugText += "File: "+files[j]+"\n";
+			if(bVerbose) {
+				debugText = "";
+				debugText += "\nFiles Array\n";
+				debugText += "------------------------------\n";
+				for(int j=0; j<files.size(); j++) {
+					debugText += "File: "+files[j]+"\n";
+				}
 			}
 			
 		}
 		else {
-			debugText += "No Files Found\n";
+			if(bVerbose) debugText += "No Files Found\n";
 		}
 		bSearching = false;
 	}
