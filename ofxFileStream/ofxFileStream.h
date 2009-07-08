@@ -14,6 +14,7 @@ private:
 	int					fileIDCount;
 	ofxTimer			timer;
 	bool				bSearching;
+	bool				bVerbose;
 	
 public:
 	
