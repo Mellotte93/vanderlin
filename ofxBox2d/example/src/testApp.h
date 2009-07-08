@@ -8,6 +8,10 @@
 class CustomParticle : public ofxBox2dCircle {
 	
 public:
+	float c;
+	CustomParticle() {
+		c = (int)ofRandom(30, 100);
+	}
 	ofColor color;
 	void draw() {
 		float radius = getRadius();
@@ -15,7 +19,7 @@ public:
 		glPushMatrix();
 		glTranslatef(getPosition().x, getPosition().y, 0);
 		
-		ofSetColor(color.r, color.g, color.b);
+		ofSetColor(c, c, c);
 		ofFill();
 		ofCircle(0, 0, radius);	
 		

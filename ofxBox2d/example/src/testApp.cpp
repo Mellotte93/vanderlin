@@ -10,14 +10,14 @@ void testApp::setup() {
 	
 	
 	ofSetVerticalSync(true);
-	ofBackground(4, 4, 4);
+	ofBackground(255, 255, 255);
 	ofSetLogLevel(OF_LOG_NOTICE);
 	
 	bDrawLines  = false;
 	bMouseForce = false;
 	
 	box2d.init();
-	box2d.setGravity(0, 10);
+	box2d.setGravity(0, 0);
 	box2d.createFloor();
 	box2d.checkBounds(true);
 	box2d.setFPS(30.0);
@@ -135,7 +135,7 @@ void testApp::keyPressed(int key) {
 		circles.push_back(circle);
 	}
 	if(key == 'z') {
-		float r = ofRandom(14, 40);		// a random radius 4px - 20px
+		float r = ofRandom(3, 10);		// a random radius 4px - 20px
 		CustomParticle p;
 		p.setPhysics(0.4, 0.953, 0.31);
 		p.setup(box2d.getWorld(), mouseX, mouseY, r);
