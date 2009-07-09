@@ -59,7 +59,7 @@ public:
 	vector		<CustomParticle>	customParticles;  //	this is a custom particle the extends a cirlce
 	
 	ofxBox2dCircle					ballJoints[5];	  //	ball joints
-	ofxBox2dJoint					joints[5];			  //	box2d joints
+	ofxBox2dJoint					joints[5];		  //	box2d joints
 	
 	ofxBox2dLine					lineStrip;		  //	a linestrip for drawing
 	
