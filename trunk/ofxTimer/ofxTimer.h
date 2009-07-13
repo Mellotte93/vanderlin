@@ -24,7 +24,7 @@ class ofxTimer {
 	
 private:
 	
-	//timer
+	// timer
 	bool		bLoop;
 	bool		bPauseTimer;
 	bool		bStartTimer;
