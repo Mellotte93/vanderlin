@@ -1,8 +1,11 @@
+
 #include "PhotoStream.h"
 
 PhotoStream * photoStream = NULL;
 
-// ------------------------------------
+
+
+// ------------------------------------ constructor 
 PhotoStream::PhotoStream() {
 }
 PhotoStream::~PhotoStream() {
@@ -23,9 +26,6 @@ void PhotoStream::setup(string pathToFolder, float seconds) {
 	
 	
 	photoLoadCount = 0;
-	maxPhotos = 3;
-	
-	
 	photoWidth = 100;
 	
 	setupFileStream(pathToFolder, seconds);

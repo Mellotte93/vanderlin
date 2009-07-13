@@ -25,35 +25,13 @@
 
 #define MAX_PHOTOS 5
 
-class PhotoLoader {
-
-public:
-	int			id;
-	ofImage		img;
-	string		name;
-	bool		bLoaded;
-	PhotoLoader() {
-		bLoaded = false;
-		name  = "";
-		id = 0;
-	}
-	~PhotoLoader() {
-		printf("*** Photo Loader Destroyed ***\n");	
-	}
-};
-
-
-
 
 class PhotoStream :public ofxFileStream {
 	
 private:
 	
-	//vector  <PhotoLoader*>	imagesToLoad;
-	//vector  <PhotoObject*>	images;
 	int						photoWidth;
 	int						photoLoadCount;
-	int						maxPhotos;
 	PhotoObject *			images[MAX_PHOTOS];
 	
 	
@@ -78,4 +56,7 @@ public:
 		
 };
 
-extern PhotoStream * photoStream;
+extern PhotoStream * photoStream;	// so that we can use it everywhere
+
+
+
