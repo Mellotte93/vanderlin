@@ -41,11 +41,11 @@ public:
 	
 	
 	// thumbnail
-	ofTexture		thumbnailTexture;
+	ofxPBOTexture		thumbnailTexture;
 	ofImage			thumbnailPixels;
 	
 	// HD image
-	ofTexture		hdTexture;
+	ofxPBOTexture		hdTexture;
 	ofImage			hdPixels;
 	
 	// ------------------------------------
@@ -76,9 +76,7 @@ public:
 	
 	// ------------------------------------	
 	~PhotoObject() {
-		
-		//clear();
-		
+				
 		// hd
 		hdPixels.clear();
 		hdTexture.clear();
@@ -92,6 +90,8 @@ public:
 
 	// ------------------------------------ reset the photo obj to load a new one
 	void reset() {
+		
+	
 		
 		// we are dead
 		bAlive = false;
@@ -115,7 +115,6 @@ public:
 		
 		// stop the thread
 		if(isThreadRunning()) {
-			//unlock();
 			stopThread();			
 		}
 		
@@ -137,12 +136,14 @@ public:
 	
 	// ------------------------------------
 	void threadedFunction() {
+		
+		// we are so fast we need to slow down
+		ofSleepMillis(100); 
+	
 		if(lock()) {
-			
 			loadThePixels();
 			bPixelsLoaded = true;
 			unlock();
-			
 		}
 
 	}
@@ -213,13 +214,18 @@ public:
 			thumbnailPixels.resize(150, 150*ratio);
 			
 			// lets resize the larger one
-			//resize(maxWidth, maxWidth*ratio);
+			hdPixels.resize(maxWidth, maxWidth*ratio);
 			
 			
 			//printf("--- Ratio: %f ---\n", ratio);
 			printf("--- Pixels Loaded [%i/%i] ---\n", (int)hdPixels.getWidth(), (int)hdPixels.getHeight());
 			
+			
+			// ok we are done kick it off
 			bAlive = true;
+			if(isThreadRunning()) {
+				stopThread();			
+			}
 			
 		}
 		else {
@@ -237,17 +243,18 @@ public:
 			//printf("--- ready to upload the texture ---\n");
 			//printf("-- Texture t:%i r:%f w:%f h:%f --\n", type, ratio, getWidth(), getHeight());
 			
-			//PBOtex.allocate((int)getWidth(), (int)getHeight(), GL_RGB);	
-			//PBOtex.loadData(myPixels.pixels, getWidth(), getHeight(), GL_RGB);
-			
 			// lets make a thumbnail texture
-			thumbnailTexture.allocate(thumbnailPixels.getWidth(), thumbnailPixels.getHeight(), GL_RGB);
-			thumbnailTexture.loadData(thumbnailPixels.getPixels(), thumbnailPixels.getWidth(), thumbnailPixels.getHeight(), GL_RGB);
+			thumbnailTexture.allocate((int)thumbnailPixels.getWidth(), (int)thumbnailPixels.getHeight(), GL_RGB);
+			thumbnailTexture.loadData(thumbnailPixels.getPixels(), (int)thumbnailPixels.getWidth(), (int)thumbnailPixels.getHeight(), GL_RGB);
 			
 			// lets make the HD texture
+			hdTexture.allocate((int)hdPixels.getWidth(), (int)hdPixels.getHeight(), GL_RGB);
+			hdTexture.loadData(hdPixels.getPixels(), (int)hdPixels.getWidth(), (int)hdPixels.getHeight(), GL_RGB);
+			
 			
 			bTextureReady = true;
 			
+			printf("--- the texture is loaded ---\n");
 		}
 	}
 	
