@@ -26,7 +26,7 @@ public:
 	float			scale;
 	bool			doSleep;
 	bool			bWorldCreated;
-	bool			enableGrabbing;
+	bool			bEnableGrabbing;
 	bool			bCheckBounds;
 	
 	ofPoint			gravity;
@@ -51,11 +51,13 @@ public:
 	int		 getBodyCount()  { return world->GetBodyCount(); }
 	int		 getJointCount() { return world->GetJointCount(); }
 	
+	void enableGrabbing() { bEnableGrabbing = true; };
+	void disableGrabbing() { bEnableGrabbing = false; };
 	
 	void setGravity(float x, float y);
 	void setGravity(ofPoint pt);
 	void setBounds(ofPoint lowBounds, ofPoint upBounds);
-	void createBounds();
+	void createBounds(float x=0, float y=0, float w=ofGetWidth(), float h=ofGetHeight());
 	void createFloor();
 	void checkBounds(bool b);
 	

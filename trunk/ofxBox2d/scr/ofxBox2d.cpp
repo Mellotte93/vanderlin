@@ -9,7 +9,7 @@ void ofxBox2d::init() {
 	
 	//settings
 	bCheckBounds   = false;
-	enableGrabbing = true;
+	bEnableGrabbing = true;
 	bWorldCreated  = false;
 	scale		   = 30.0f;
 	doSleep		   = true;
@@ -47,7 +47,7 @@ void ofxBox2d::init() {
 // ------------------------------------------------------ grab shapes 
 void ofxBox2d::mousePressed(ofMouseEventArgs &e) {
 	
-	if(enableGrabbing) {
+	if(bEnableGrabbing) {
 		b2Vec2 p(e.x/OFX_BOX2D_SCALE, e.y/OFX_BOX2D_SCALE);
 		
 		if (mouseJoint != NULL) {
@@ -99,11 +99,11 @@ void ofxBox2d::mousePressed(ofMouseEventArgs &e) {
 }
 void ofxBox2d::mouseDragged(ofMouseEventArgs &e) {
 	b2Vec2 p(e.x/OFX_BOX2D_SCALE, e.y/OFX_BOX2D_SCALE);
-	if (mouseJoint && enableGrabbing) mouseJoint->SetTarget(p);
+	if (mouseJoint && bEnableGrabbing) mouseJoint->SetTarget(p);
 }
 void ofxBox2d::mouseReleased(ofMouseEventArgs &e) {
 	
-	if(mouseJoint && enableGrabbing) {
+	if(mouseJoint && bEnableGrabbing) {
 		world->DestroyJoint(mouseJoint);
 		mouseJoint = NULL;
 	}
@@ -143,7 +143,7 @@ void ofxBox2d::createFloor() {
 }
 
 // ------------------------------------------------------ create bounds
-void ofxBox2d::createBounds() {
+void ofxBox2d::createBounds(float x, float y, float w, float h) {
 	
 	if(!bWorldCreated) return;
 	
@@ -159,16 +159,16 @@ void ofxBox2d::createBounds() {
 	float thick = 30/OFX_BOX2D_SCALE;
 	// w h x y r 
 	//right
-	sd.SetAsBox(thick, (ofGetHeight()/OFX_BOX2D_SCALE)/2, b2Vec2((ofGetWidth()/OFX_BOX2D_SCALE), (ofGetHeight()/OFX_BOX2D_SCALE)/2), 0.0);
+	sd.SetAsBox(thick, (h/OFX_BOX2D_SCALE)/2, b2Vec2((w/OFX_BOX2D_SCALE), (h/OFX_BOX2D_SCALE)/2), 0.0);
 	ground->CreateShape(&sd);
 	//left
-	sd.SetAsBox(thick, (ofGetHeight()/OFX_BOX2D_SCALE)/2, b2Vec2(0, (ofGetHeight()/OFX_BOX2D_SCALE)/2), 0.0);
+	sd.SetAsBox(thick, (h/OFX_BOX2D_SCALE)/2, b2Vec2(0, (h/OFX_BOX2D_SCALE)/2), 0.0);
 	ground->CreateShape(&sd);
 	//top
-	sd.SetAsBox((ofGetWidth()/OFX_BOX2D_SCALE)/2, thick, b2Vec2((ofGetWidth()/OFX_BOX2D_SCALE)/2, 0), 0.0);
+	sd.SetAsBox((w/OFX_BOX2D_SCALE)/2, thick, b2Vec2((w/OFX_BOX2D_SCALE)/2, 0), 0.0);
 	ground->CreateShape(&sd);
 	//bottom
-	sd.SetAsBox((ofGetWidth()/OFX_BOX2D_SCALE)/2, thick, b2Vec2((ofGetWidth()/OFX_BOX2D_SCALE)/2, ofGetHeight()/OFX_BOX2D_SCALE), 0.0);
+	sd.SetAsBox((w/OFX_BOX2D_SCALE)/2, thick, b2Vec2((w/OFX_BOX2D_SCALE)/2, h/OFX_BOX2D_SCALE), 0.0);
 	ground->CreateShape(&sd);
 }
 
@@ -182,7 +182,7 @@ void ofxBox2d::update() {
 	
 	// destroy the object if we are out of the bounds
 	if(bCheckBounds) {
-		/* need to add a bit of code to remove the bodie */
+		/* need to add a bit of code to remove the bodies */
 	}
 	
 	
@@ -197,6 +197,7 @@ void ofxBox2d::update() {
 
 // ------------------------------------------------------ 
 void ofxBox2d::draw() {
+	
 	if(mouseJoint) {
 		b2Body* mbody = mouseJoint->GetBody2();
 		b2Vec2 p1 = mbody->GetWorldPoint(mouseJoint->m_localAnchor);

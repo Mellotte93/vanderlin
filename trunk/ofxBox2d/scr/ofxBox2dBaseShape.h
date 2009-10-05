@@ -32,6 +32,7 @@ public:
 		mass     = 0.0;
 		bounce   = 0.0;
 		friction = 0.0;
+		bodyDef.allowSleep = true;
 	}		
 	
 	//------------------------------------------------ 
@@ -117,6 +118,9 @@ public:
 			body->SetLinearVelocity(b2Vec2(x, y));
 		}
 	}
+	virtual void setVelocity(ofPoint p) {
+		setVelocity(p.x, p.y);
+	}
 	ofPoint getVelocity() {
 		return ofPoint(body->GetLinearVelocity().x, body->GetLinearVelocity().y);
 	}
@@ -129,6 +133,10 @@ public:
 			body->SetLinearVelocity(v);
 		}
 	}
+	virtual void addDamping(float f) {
+		addDamping(f, f);
+	}
+	
 	
 	//------------------------------------------------
 	virtual void addForce(ofPoint pt, ofPoint amt) {
@@ -138,11 +146,18 @@ public:
 	}
 	
 	//------------------------------------------------
+	virtual void addImpulseForce(ofPoint pt, ofPoint amt=1.0) {
+		if(body != NULL) {
+			body->ApplyImpulse(b2Vec2(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE), b2Vec2(amt.x, amt.y));
+		}
+	}
+	
+	//------------------------------------------------
 	virtual void addAttractionPoint(ofPoint pt, float amt, float minDis=NULL) {
 		if(body != NULL) {
 			b2Vec2 P(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE);
 			b2Vec2 D = P - body->GetPosition(); 
-			if(D.LengthSquared() < minDis || minDis == NULL) {;
+			if(D.LengthSquared() < minDis) {;
 				P.Normalize();
 				b2Vec2 F = amt * D;
 				body->ApplyForce(F, P);
@@ -199,6 +214,8 @@ public:
 		body  = NULL;
 		dead  = true;
 		alive = false;
+		
+		//printf("--- dead ---\n");
 	}
 	
 	//------------------------------------------------
