@@ -17,13 +17,14 @@
 class ofxBox2d {
 	
 private:
-	float			fps;
+	
+	float				fps;
 	
 public:
 	
-	b2AABB			worldAABB;
-	b2World *		world;
-	ofxBox2dRender	debugRender;
+	b2AABB				worldAABB;
+	b2World *			world;
+	ofxBox2dRender		debugRender;
 	
 	float				scale;
 	bool				doSleep;
