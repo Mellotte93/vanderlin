@@ -44,6 +44,18 @@ void ofxBox2d::init() {
 	
 }
 
+
+// ------------------------------------------------------ grab shapes 
+void ofxBox2d::setContactListener(ofxBox2dContactListener * listener) {
+	
+	if(world != NULL) {
+		world->SetContactListener(listener);
+	}
+	else {
+		printf("--- you need a world ---\n");	
+	}
+}
+
 // ------------------------------------------------------ grab shapes 
 void ofxBox2d::mousePressed(ofMouseEventArgs &e) {
 	

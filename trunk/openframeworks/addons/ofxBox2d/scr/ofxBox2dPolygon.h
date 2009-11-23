@@ -34,6 +34,10 @@ public:
 		vertexCount = (int)vertices.size();
 		b2PolygonDef poly;
 		poly.vertexCount = vertexCount;
+		poly.density	  = 1.0;
+		poly.restitution  = 0.790;
+		poly.friction	  = 0.10;
+		
 		
 		//scale to world
 		for(int i=0; i<vertexCount; i++) {
@@ -44,11 +48,10 @@ public:
 		
 		
 		
-		poly.density	  = 0.0;
-		poly.restitution  = 0.790;
-		poly.friction	  = 0.10;
 		
-		enableGravity(false);
+		
+		
+		//enableGravity(false);
 		
 		//Build Body for shape
 		b2BodyDef bodyDef;
@@ -57,14 +60,16 @@ public:
 		body->CreateShape(&poly);
 		body->SetMassFromShapes();
 		
+		
+		
 		//set the filter data
 		b2FilterData data;
 		data.categoryBits = 0x0003;
 		data.maskBits = 0x1;
 		data.groupIndex = -3;
-		setFilterData(data);	
+		//setFilterData(data);	
 		
-	//	printf("--- We built the shape \n---");
+		//	printf("--- We built the shape \n---");
 	}
 	
 	//------------------------------------------------
@@ -196,10 +201,10 @@ public:
 			// Shifting the edge inward by b2_toiSlop should
 			// not cause the plane to pass the centroid.
 			//printf("--- d: %f  %f\n ---", d.x, d.y);
-
+			
 			// Your shape has a radius/extent less than b2_toiSlop.
 			if (d.x < 1.3f || d.y < 1.3f) {
-			//	printf("---BAD SHAPE d: %f  %f\n ---", d.x, d.y);
+				//	printf("---BAD SHAPE d: %f  %f\n ---", d.x, d.y);
 				
 				return false;
 			}
@@ -266,36 +271,37 @@ public:
 	
 	//------------------------------------------------
 	void draw() {
-		
-		//wow this is a pain
-		b2Shape* s = body->GetShapeList();
-		const b2XForm& xf = body->GetXForm();
-		b2PolygonShape* poly = (b2PolygonShape*)s;
-		int count = poly->GetVertexCount();
-		const b2Vec2* localVertices = poly->GetVertices();
-		b2Assert(vertexCount <= b2_maxPolygonVertices);
-		b2Vec2 verts[b2_maxPolygonVertices];
-		for(int i=0; i<vertexCount; i++) {
-			verts[i] = b2Mul(xf, localVertices[i]);
+		if(body != NULL ) {
+			//wow this is a pain
+			b2Shape* s = body->GetShapeList();
+			const b2XForm& xf = body->GetXForm();
+			b2PolygonShape* poly = (b2PolygonShape*)s;
+			int count = poly->GetVertexCount();
+			const b2Vec2* localVertices = poly->GetVertices();
+			b2Assert(vertexCount <= b2_maxPolygonVertices);
+			b2Vec2 verts[b2_maxPolygonVertices];
+			for(int i=0; i<vertexCount; i++) {
+				verts[i] = b2Mul(xf, localVertices[i]);
+			}
+			
+			ofEnableAlphaBlending();
+			ofSetColor(10, 100, 255, 100);
+			ofFill();
+			ofBeginShape();
+			for(int i=0; i<count; i++) {
+				ofVertex(verts[i].x*OFX_BOX2D_SCALE, verts[i].y*OFX_BOX2D_SCALE);
+			}
+			ofEndShape();
+			
+			ofNoFill();
+			ofSetColor(20, 20, 20);
+			ofBeginShape();
+			for(int i=0; i<count; i++) {
+				ofVertex(verts[i].x*OFX_BOX2D_SCALE, verts[i].y*OFX_BOX2D_SCALE);
+			}
+			ofEndShape(true);
+			ofDisableAlphaBlending();
 		}
-		
-		ofEnableAlphaBlending();
-		ofSetColor(10, 100, 255, 100);
-		ofFill();
-		ofBeginShape();
-		for(int i=0; i<count; i++) {
-			ofVertex(verts[i].x*OFX_BOX2D_SCALE, verts[i].y*OFX_BOX2D_SCALE);
-		}
-		ofEndShape();
-		
-		ofNoFill();
-		ofSetColor(20, 20, 20);
-		ofBeginShape();
-		for(int i=0; i<count; i++) {
-			ofVertex(verts[i].x*OFX_BOX2D_SCALE, verts[i].y*OFX_BOX2D_SCALE);
-		}
-		ofEndShape(true);
-		ofDisableAlphaBlending();
 	}
 };
 
