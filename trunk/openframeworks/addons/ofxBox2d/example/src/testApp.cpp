@@ -1,5 +1,5 @@
+
 #include "testApp.h"
-#include "stdio.h"
 
 //--------------------------------------------------------------
 testApp::testApp(){
@@ -10,14 +10,14 @@ void testApp::setup() {
 	
 	
 	ofSetVerticalSync(true);
-	ofBackground(255, 255, 255);
+	ofBackground(20, 20, 20);
 	ofSetLogLevel(OF_LOG_NOTICE);
 	
 	bDrawLines  = false;
 	bMouseForce = false;
 	
 	box2d.init();
-	box2d.setGravity(0, 0);
+	box2d.setGravity(0, 10);
 	box2d.createFloor();
 	box2d.checkBounds(true);
 	box2d.setFPS(30.0);
@@ -40,17 +40,14 @@ void testApp::setup() {
 		}
 	}
 	
-	// lets draw a simple wave
-	ofPoint p;
-	float y = 0;
+	// lets draw a simple lanscape
+	ofPoint p(40, 400);
+	int segs = 50;
 	lineStrip.setWorld(box2d.getWorld());
 	lineStrip.clear();
-	for(int i=0; i<50; i++) {
-		p.x += 18;
-		p.y += cos(y)*ofRandom(10, 40);
-		y += i * ofRandom(10, 30);
-
-		lineStrip.addPoint(30+p.x, (ofGetHeight()/2)+p.y);
+	for(int i=0; i<segs; i++) {
+		p.x += 15;
+		lineStrip.addPoint(p.x, p.y+sin(i*ofRandom(0.01, 0.5))*30);
 	}
 	lineStrip.createShape();
 	
@@ -66,12 +63,13 @@ void testApp::update() {
 	if(bMouseForce) {
 		float strength = 8.0f;
 		float damping  = 0.7f;
+		float minDis   = 100;
 		for(int i=0; i<circles.size(); i++) {
-			circles[i].addAttractionPoint(mouseX, mouseY, strength);
+			circles[i].addAttractionPoint(mouseX, mouseY, strength, minDis);
 			circles[i].addDamping(damping, damping);
 		}
 		for(int i=0; i<customParticles.size(); i++) {
-			customParticles[i].addAttractionPoint(mouseX, mouseY, strength);
+			customParticles[i].addAttractionPoint(mouseX, mouseY, strength, minDis);
 			customParticles[i].addDamping(damping, damping);
 		}
 		
@@ -115,9 +113,9 @@ void testApp::draw() {
 	info += "Press [s] to draw a line strip ["+ofToString(bDrawLines)+"]\n"; 
 	info += "Press [f] to toggle Mouse Force ["+ofToString(bMouseForce)+"]\n"; 
 	info += "Press [c] for circles\n";
-	info += "Press [b] for circles\n";
+	info += "Press [b] for blocks\n";
 	info += "Press [z] for custom particle\n";
-	info += "Total Bobies: "+ofToString(box2d.getBodyCount())+"\n";
+	info += "Total Bodies: "+ofToString(box2d.getBodyCount())+"\n";
 	info += "Total Joints: "+ofToString(box2d.getJointCount())+"\n\n";
 	info += "FPS: "+ofToString(ofGetFrameRate())+"\n";
 	ofSetColor(255, 255, 255);
@@ -137,10 +135,10 @@ void testApp::keyPressed(int key) {
 	if(key == 'z') {
 		float r = ofRandom(3, 10);		// a random radius 4px - 20px
 		CustomParticle p;
-		p.setPhysics(0.4, 0.953, 0.31);
+		p.setPhysics(0.4, 0.53, 0.31);
 		p.setup(box2d.getWorld(), mouseX, mouseY, r);
 		p.color.r = ofRandom(20, 100);
-		p.color.g = 0;//ofRandom(0, 255);
+		p.color.g = 0;
 		p.color.b = ofRandom(150, 255);
 		customParticles.push_back(p);
 	}	
