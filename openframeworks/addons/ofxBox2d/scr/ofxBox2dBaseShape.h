@@ -41,6 +41,10 @@ public:
 	}
 	
 	//------------------------------------------------ 
+	virtual void init() {
+	}
+	
+	//------------------------------------------------ 
 	virtual void setElasticity(float val) {
 		bounce = val;
 	}
@@ -51,13 +55,33 @@ public:
 	
 	//------------------------------------------------ 
 	virtual void setMass(float val) {
-		//this is not working !
+		// -- this is not working ! --
 		/*b2MassData data;
 		 data.mass = 3;
 		 data.center = body->GetPosition();
 		 data.I = body->GetInertia();
 		 body->SetMass(&data);
 		 */
+	}
+
+	//------------------------------------------------ 
+	void setData(void*data) {
+		if(body) {
+			body->SetUserData(data);
+		}
+		else {
+			ofLog(OF_LOG_NOTICE, "- must have a valid body -");
+		}
+	}
+	
+	//------------------------------------------------ 
+	void* getData() {
+		if(body) {
+			body->GetUserData();
+		}
+		else {
+			ofLog(OF_LOG_NOTICE, "- must have a valid body -");
+		}
 	}
 	
 	//------------------------------------------------ 
@@ -101,7 +125,7 @@ public:
 			ofLog(OF_LOG_NOTICE, "- must have a valid world -");
 			return;
 		}
-		world				= theworld;
+		world = theworld;
 	}
 	//------------------------------------------------ 
 	virtual void setPosition(float x, float y) {
@@ -155,7 +179,7 @@ public:
 	//------------------------------------------------
 	virtual void addAttractionPoint(ofPoint pt, float amt, float minDis=NULL) {
 		
-		if(minDis == NULL) minDis = 1; // not using this
+		// if(minDis == NULL) minDis = 1; // not using this
 		
 		if(body != NULL) {
 			b2Vec2 P(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE);

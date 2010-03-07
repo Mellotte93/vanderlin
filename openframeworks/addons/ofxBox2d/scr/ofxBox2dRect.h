@@ -35,12 +35,12 @@ public:
 		//set properties
 		if(isFixed) {
 			shape.density	  = 0;
-			shape.restitution  = 0;
+			shape.restitution = 0;
 			shape.friction	  = 0;
 		}
 		else {
 			shape.density	  = mass;
-			shape.restitution  = bounce;
+			shape.restitution = bounce;
 			shape.friction	  = friction;
 		}
 		
@@ -50,6 +50,9 @@ public:
 		body->SetLinearVelocity(b2Vec2(0.0, 0.0));
 		body->CreateShape(&shape);
 		body->SetMassFromShapes();
+		
+		// anything that you need called
+		init();
 	}
 	
 	

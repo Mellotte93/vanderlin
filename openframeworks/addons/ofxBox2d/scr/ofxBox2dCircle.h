@@ -9,7 +9,6 @@ class ofxBox2dCircle : public ofxBox2dBaseShape {
 public:
 	
 	b2CircleDef circle;
-	
 	//------------------------------------------------
 	
 	ofxBox2dCircle() {
@@ -24,7 +23,7 @@ public:
 		}
 		
 		world				= b2dworld;
-		circle.radius		= size/OFX_BOX2D_SCALE;//ofRandom(15, 50)/OFX_BOX2D_SCALE;
+		circle.radius		= size/OFX_BOX2D_SCALE;
 		bIsFixed			= isFixed;
 		
 		if(isFixed) {
@@ -43,7 +42,9 @@ public:
 		body->SetLinearVelocity(b2Vec2(0.0, 0.0));
 		body->CreateShape(&circle);
 		body->SetMassFromShapes();
-		
+	
+		// anything that you need called
+		init();
 	}
 	
 	//------------------------------------------------
@@ -81,6 +82,9 @@ public:
 	 Im not sure about this it seems like a bad idea.
 	 I cant figure out another way to change the radius of
 	 a shape that we have
+	 
+	 -- any help here :) --
+	 
 	 */
 	void setRadius(float r) {
 		
@@ -102,7 +106,6 @@ public:
 	
 	//------------------------------------------------
 	virtual void draw() {
-		
 		if(dead && !body) return;
 		
 		float radius = getRadius();

@@ -8,11 +8,12 @@ ofxBox2d::ofxBox2d() {
 void ofxBox2d::init() {
 	
 	//settings
-	bCheckBounds   = false;
-	bEnableGrabbing = true;
-	bWorldCreated  = false;
-	scale		   = 30.0f;
-	doSleep		   = true;
+	bHasContactListener = false;
+	bCheckBounds		= false;
+	bEnableGrabbing		= true;
+	bWorldCreated		= false;
+	scale				= OFX_BOX2D_SCALE;
+	doSleep				= true;
 	
 	//gravity
 	gravity.set(0, 5.0f);
@@ -49,6 +50,7 @@ void ofxBox2d::init() {
 void ofxBox2d::setContactListener(ofxBox2dContactListener * listener) {
 	
 	if(world != NULL) {
+		bHasContactListener = true;
 		world->SetContactListener(listener);
 	}
 	else {
@@ -131,6 +133,7 @@ void ofxBox2d::setGravity(ofPoint pt) {
 
 // ------------------------------------------------------ set bounds
 void ofxBox2d::setBounds(ofPoint lowBounds, ofPoint upBounds) {
+	// still need to work on this...
 }
 
 // ------------------------------------------------------ create bounds
@@ -148,7 +151,7 @@ void ofxBox2d::createFloor() {
 	sd.restitution = 0.0f;
 	sd.friction = 0.6;
 	float thick = 30/OFX_BOX2D_SCALE;
-
+	
 	//bottom
 	sd.SetAsBox((ofGetWidth()/OFX_BOX2D_SCALE)/2, thick, b2Vec2((ofGetWidth()/OFX_BOX2D_SCALE)/2, ofGetHeight()/OFX_BOX2D_SCALE), 0.0);
 	ground->CreateShape(&sd);
@@ -194,9 +197,41 @@ void ofxBox2d::update() {
 	
 	// destroy the object if we are out of the bounds
 	if(bCheckBounds) {
-		/* need to add a bit of code to remove the bodies */
+		/*
+		 float top = 0;
+		 float bottom = ofGetHeight();
+		 float right = ofGetWidth();
+		 float left = 0;
+		 
+		 b2Body* node = world->GetBodyList();
+		 while(node) {
+		 b2Body* b = node;
+		 node = node->GetNext();
+		 b2Vec2 p = b->GetPosition();
+		 ofxBox2dBaseShape* base = (ofxBox2dBaseShape*)b->GetUserData();
+		 if(base) {
+		 //printf("dead:%i\n", base->dead);
+		 
+		 if(p.y*OFX_BOX2D_SCALE > bottom) {
+		 base->dead = true;
+		 world->DestroyBody(b);
+		 }
+		 if(p.y*OFX_BOX2D_SCALE < top) {
+		 base->dead = true;
+		 world->DestroyBody(b);
+		 }
+		 if(p.x*OFX_BOX2D_SCALE > right) {
+		 base->dead = true;
+		 world->DestroyBody(b);
+		 }
+		 if(p.x*OFX_BOX2D_SCALE < left) {
+		 base->dead = true;
+		 world->DestroyBody(b);
+		 }
+		 */
+		
+		
 	}
-	
 	
 	float	timeStep		   = (1.0f / fps);
 	int		velocityIterations = 40;
@@ -231,24 +266,26 @@ void ofxBox2d::draw() {
 	}
 	
 	//draw the ground
-	for(b2Shape* s=ground->GetShapeList(); s; s=s->GetNext()) {
-		
-		const b2XForm& xf = ground->GetXForm();		
-		b2PolygonShape* poly = (b2PolygonShape*)s;
-		int count = poly->GetVertexCount();
-		const b2Vec2* verts = poly->GetVertices();
-		ofEnableAlphaBlending();
-		ofFill();
-		ofSetColor(90, 90, 90, 100);
-		ofBeginShape();
-		for(int j=0; j<count; j++) {
+	if(ground) {
+		for(b2Shape* s=ground->GetShapeList(); s; s=s->GetNext()) {
 			
-			b2Vec2 pt = b2Mul(xf, verts[j]);
-			
-			ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
+			const b2XForm& xf = ground->GetXForm();		
+			b2PolygonShape* poly = (b2PolygonShape*)s;
+			int count = poly->GetVertexCount();
+			const b2Vec2* verts = poly->GetVertices();
+			ofEnableAlphaBlending();
+			ofFill();
+			ofSetColor(90, 90, 90, 100);
+			ofBeginShape();
+			for(int j=0; j<count; j++) {
+				
+				b2Vec2 pt = b2Mul(xf, verts[j]);
+				
+				ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
+			}
+			ofEndShape();
+			ofDisableAlphaBlending();
 		}
-		ofEndShape();
-		ofDisableAlphaBlending();
 	}
 }
 
