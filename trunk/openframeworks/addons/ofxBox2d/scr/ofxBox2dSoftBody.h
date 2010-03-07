@@ -2,7 +2,7 @@
 
 #include "ofxBox2d.h"
 
-class ofxBox2dSoftBody {
+class ofxBox2dSoftBody : public ofxBox2dBaseShape {
 	
 	
 public:
@@ -306,6 +306,9 @@ public:
 		}
 		
 		//center.setFilterData(data);
+		
+		// anything that you need called
+		init();
 	}
 	
 	// ------------------------------------------------

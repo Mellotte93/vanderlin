@@ -86,6 +86,9 @@ public:
 		body->SetMassFromShapes();
 		
 		bShapeCreated = true;
+		
+		// anything that you need called
+		init();
 	}
 	
 	//------------------------------------------------

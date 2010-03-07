@@ -31,6 +31,7 @@ public:
 	bool				bWorldCreated;
 	bool				bEnableGrabbing;
 	bool				bCheckBounds;
+	bool				bHasContactListener;
 	
 	ofPoint				gravity;
 	b2BodyDef			bd;
