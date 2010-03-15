@@ -81,6 +81,7 @@ public:
 				b2PolygonShape* poly = (b2PolygonShape*)s;
 				int count = poly->GetVertexCount();
 				const b2Vec2* verts = poly->GetVertices();
+				
 				ofEnableAlphaBlending();
 				ofFill();
 				ofSetColor(255, 0, 255, 100);
@@ -90,6 +91,16 @@ public:
 					ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
 				}
 				ofEndShape();
+				
+				ofNoFill();
+				ofSetColor(255, 255, 255);
+				ofBeginShape();
+				for(int j=0; j<count; j++) {
+					b2Vec2 pt = b2Mul(xf, verts[j]);
+					ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
+				}
+				ofEndShape(true);
+				
 				ofDisableAlphaBlending();
 				
 			}
