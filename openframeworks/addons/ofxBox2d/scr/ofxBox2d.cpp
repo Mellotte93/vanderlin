@@ -137,7 +137,7 @@ void ofxBox2d::setBounds(ofPoint lowBounds, ofPoint upBounds) {
 }
 
 // ------------------------------------------------------ create bounds
-void ofxBox2d::createFloor() {
+void ofxBox2d::createFloor(float floorWidth, float bottom) {
 	
 	if(!bWorldCreated) return;
 	
@@ -150,10 +150,11 @@ void ofxBox2d::createFloor() {
 	sd.density = 0.0f;
 	sd.restitution = 0.0f;
 	sd.friction = 0.6;
-	float thick = 30/OFX_BOX2D_SCALE;
+	float thick = 5/OFX_BOX2D_SCALE;
 	
 	//bottom
-	sd.SetAsBox((ofGetWidth()/OFX_BOX2D_SCALE)/2, thick, b2Vec2((ofGetWidth()/OFX_BOX2D_SCALE)/2, ofGetHeight()/OFX_BOX2D_SCALE), 0.0);
+	sd.SetAsBox((floorWidth/OFX_BOX2D_SCALE)/2, thick, 
+				b2Vec2((floorWidth/OFX_BOX2D_SCALE)/2, (bottom-thick)/OFX_BOX2D_SCALE), 0.0);
 	ground->CreateShape(&sd);
 }
 

@@ -64,7 +64,7 @@ public:
 	void setGravity(ofPoint pt);
 	void setBounds(ofPoint lowBounds, ofPoint upBounds);
 	void createBounds(float x=0, float y=0, float w=ofGetWidth(), float h=ofGetHeight());
-	void createFloor();
+	void createFloor(float floorWidth=ofGetWidth(), float bottom=ofGetHeight());
 	void checkBounds(bool b);
 	
 	void update(); 
