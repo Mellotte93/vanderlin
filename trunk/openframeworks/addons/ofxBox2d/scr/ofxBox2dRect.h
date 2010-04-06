@@ -10,7 +10,7 @@ public:
 	
 	
 	b2PolygonDef shape;
-	
+
 	//------------------------------------------------
 	
 	ofxBox2dRect() {
@@ -26,7 +26,9 @@ public:
 		
 		world				= b2dworld;
 		bIsFixed			= isFixed;
+		
 		//Rect Shape
+		w/=2; h/=2;
 		shape.SetAsBox(w/OFX_BOX2D_SCALE, h/OFX_BOX2D_SCALE);
 		
 		//Build Body for shape
@@ -44,6 +46,8 @@ public:
 			shape.friction	  = friction;
 		}
 		
+		// need to check for rect mode
+		x += w; y += h;
 		bodyDef.position.Set(x/OFX_BOX2D_SCALE, y/OFX_BOX2D_SCALE);	
 		
 		body = world->CreateBody(&bodyDef);
@@ -63,22 +67,11 @@ public:
 	 b2CircleShape *data = (b2CircleShape*)shape;
 	 return data->GetRadius() * OFX_BOX2D_SCALE;
 	 }
-	 
-	 //------------------------------------------------
-	 float getRotation() {
-	 
-	 const  b2XForm& xf	= body->GetXForm();
-	 float  r			= getRadius()/OFX_BOX2D_SCALE;
-	 b2Vec2 a			= xf.R.col1;
-	 b2Vec2 p1			= body->GetPosition();
-	 b2Vec2 p2			= p1 + r * a;
-	 
-	 float dx = p2.x+r/2 - p1.x+r/2;
-	 float dy = p2.y - p1.y;
-	 return ofRadToDeg(atan2(dy, dx));
-	 
-	 }
-	 */
+	 */        
+	//------------------------------------------------
+	float getRotation() {
+		return ofRadToDeg(body->GetAngle());
+	}
 	
 	
 	//------------------------------------------------
