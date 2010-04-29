@@ -24,7 +24,7 @@ enum {
 
 class ofxCairo {
 private:
-	
+	cairo_matrix_t m;
 	cairo_path_t  * path;
 	cairo_surface_t *surface;
 	cairo_t *cr;
