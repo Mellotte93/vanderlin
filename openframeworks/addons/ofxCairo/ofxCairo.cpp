@@ -15,11 +15,12 @@ ofxCairo::ofxCairo() {
 	surface = NULL;
 	bOutput = false;
 	
-	strokeSize = 1;
+	strokeSize = 0.5;
 	bStroke = false;
 	bFill   = false;
 	bDraw = true;
 	bFirstPoint = false;
+	
 }
 ofxCairo::~ofxCairo() {
 	cairo_destroy (cr); 
@@ -37,6 +38,8 @@ void ofxCairo::setup(int w, int h, int outputFormat) {
 	surface = cairo_pdf_surface_create (filename.c_str(), w, h);
 	cr = cairo_create (surface);
 	
+	setLineWidth(strokeSize);
+	
 }
 
 // -----------------------
@@ -47,7 +50,7 @@ void ofxCairo::popMatrix() {
 	glPopMatrix();
 	if(bOutput) {
 		cairo_identity_matrix ( cr );
-		scale(1.0, 1.0);
+		//scale(1.0, 1.0);
 	}
 }
 
@@ -55,6 +58,7 @@ void ofxCairo::popMatrix() {
 void ofxCairo::translate(float x, float y) {
 	glTranslatef(x, y, 0);
 	if(bOutput) {
+	 	//cairo_matrix_init_translate(&m, x, y);
 		cairo_translate( cr, x, y );
 	}
 }
@@ -63,16 +67,15 @@ void ofxCairo::translate(float x, float y) {
 void ofxCairo::rotate(float angle) {
 	if(bOutput) {
 		cairo_rotate( cr, ofDegToRad(angle) );
-		
 	}
 
 	glRotatef(angle, 0, 0, 1);
 }
 
-// -----------------------
+// ----------------------- not working...
 void ofxCairo::scale(float sx, float sy) {
-	glScalef(sx, sy, 0);
-	if(bOutput) cairo_scale( cr, sx, sy );
+	//glScalef(sx, sy, 0);
+	//if(bOutput) cairo_scale( cr, sx, sy );
 }
 
 // -----------------------
@@ -247,11 +250,9 @@ void ofxCairo::arc( double x, double y, double radius, double angle1, double ang
 		
 		
 		cairo_arc( cr, x, y, radius, angle1, angle2 );
-		cairo_fill(cr);
-		
-		if(bStroke) {
-			setColor(strokeColor);
-			cairo_arc( cr, x, y, radius, angle1, angle2 );
+		if(bFill) cairo_fill(cr);
+		else {
+			//setColor(strokeColor);
 			cairo_stroke(cr);
 		}		
 		
