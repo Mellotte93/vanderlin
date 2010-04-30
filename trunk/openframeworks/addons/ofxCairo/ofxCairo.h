@@ -39,8 +39,13 @@ private:
 	float strokeSize;
 	bool bStroke, bFill;
 	bool bDraw;
-	bool bFirstPoint;
 	ofPoint lastPoint;
+	
+	bool bShouldClose;
+	bool bFirstPoint;
+	int  whichShapeMode;
+	vector<double *>curvePts;
+	void clearAllVertices();
 	
 public:
 	
@@ -49,7 +54,9 @@ public:
 	~ofxCairo();
 	
 	// -----------------------
-	void setup(int w, int h, int outputFormat);
+	void begin(string fileName, int w, int h, int outputFormat);
+	void end();
+	
 	
 	// -----------------------
 	void enableDraw();
@@ -97,12 +104,10 @@ public:
 	void beginShape();
 	void endShape(bool bClose=false);
 	void vertex(float x, float y);
-	
-	// -----------------------
-	void begin();
-	void end(string filename="cario.pdf");
-	
-	
+	void curveVertex(float x, float y);
+	void bezierVertex(float x1, float y1, float x2, float y2, float x3, float y3);
+
+
 };
 
 

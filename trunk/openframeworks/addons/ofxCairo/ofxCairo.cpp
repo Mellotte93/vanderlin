@@ -15,11 +15,13 @@ ofxCairo::ofxCairo() {
 	surface = NULL;
 	bOutput = false;
 	
-	strokeSize = 0.5;
-	bStroke = false;
-	bFill   = false;
-	bDraw = true;
-	bFirstPoint = false;
+	strokeSize	   = 0.5;
+	bStroke		   = false;
+	bDraw		   = true;
+	bFill		   = true;
+	bFirstPoint	   = false;	
+	bShouldClose   = false;
+	whichShapeMode = 0;	
 	
 }
 ofxCairo::~ofxCairo() {
@@ -28,18 +30,44 @@ ofxCairo::~ofxCairo() {
 }
 
 // -----------------------
-void ofxCairo::setup(int w, int h, int outputFormat) {
+void ofxCairo::begin(string fileName, int w, int h, int outputFormat) {
 	
-	width = w; height = h;
-	output = outputFormat;	
-	filename = ofToDataPath("cairo.pdf");
+	ofEnableAlphaBlending();
+	bOutput = true;
+	
+	if(bOutput) {
+	
+		width = w; height = h;
+		output = outputFormat;	
+		filename = ofToDataPath(fileName);
+		surface = cairo_pdf_surface_create (filename.c_str(), w, h);
+		cr = cairo_create (surface);
+		
+		setLineWidth(strokeSize);
+		
+		// draw the background
+		float * bgColor = ofBgColorPtr();
+		cairo_set_source_rgb(cr, bgColor[0], bgColor[1], bgColor[2]);
+		cairo_paint( cr );
+	}
 	
 	
-	surface = cairo_pdf_surface_create (filename.c_str(), w, h);
-	cr = cairo_create (surface);
 	
-	setLineWidth(strokeSize);
 	
+}
+
+// -----------------------
+void ofxCairo::end() {
+	
+	cairo_save (cr);
+	bOutput = false;
+	
+	//snippet_do (cr, no, width, HEIGHT);
+	//cairo_show_page (cr);
+	//cairo_restore (cr);
+	
+	printf("PDF Saved...\n");
+	ofDisableAlphaBlending();
 }
 
 // -----------------------
@@ -68,7 +96,7 @@ void ofxCairo::rotate(float angle) {
 	if(bOutput) {
 		cairo_rotate( cr, ofDegToRad(angle) );
 	}
-
+	
 	glRotatef(angle, 0, 0, 1);
 }
 
@@ -84,7 +112,6 @@ void ofxCairo::pushClippingGroup() {
 		cairo_push_group( cr );
 	}
 }
-
 void ofxCairo::popClippingGroup() {
 	if(bOutput) {
 		cairo_pop_group_to_source( cr );
@@ -92,15 +119,6 @@ void ofxCairo::popClippingGroup() {
 	}
 }
 
-// -----------------------
-void ofxCairo::beginShape() {
-	ofBeginShape();
-	if(bOutput) {
-		bFirstPoint = true;
-		cairo_new_path (cr);
-	}
-	
-}
 
 // -----------------------
 void ofxCairo::enableDraw() {
@@ -110,33 +128,148 @@ void ofxCairo::disableDraw() {
 	bDraw = false;
 }
 
+// -----------------------
+void ofxCairo::beginShape() {
+	ofBeginShape();
+	if(bOutput) {
+		bFirstPoint		= true;
+		bShouldClose	= false;
+		cairo_new_path (cr);
+	}
+	
+}
 
 // -----------------------
 void ofxCairo::endShape(bool bClose) {
-	ofEndShape(bClose);
-	if(bOutput) {
+	if(bDraw){
+		ofEndShape(bClose);
+	}
+	if(bOutput){
 		
+		//catmull roms - we need at least 4 points to draw
+		if( whichShapeMode == 1 && curvePts.size() > 3){												
+			
+			//we go through and we calculate the bezier of each 
+			//catmull rom curve - smart right? :)
+			for (int i = 1; i< curvePts.size()-2; i++) {
+				
+				ofPoint prevPt(	curvePts[i-1][0],	curvePts[i-1][1]);
+				ofPoint startPt(curvePts[i][0],		curvePts[i][1]);							
+				ofPoint endPt(	curvePts[i+1][0],	curvePts[i+1][1]);
+				ofPoint nextPt(	curvePts[i+2][0],	curvePts[i+2][1]);
+				
+				//SUPER WEIRD MAGIC CONSTANT = 1/6
+				//Someone please explain this!!! 
+				//It works and is 100% accurate but wtf!
+				ofPoint cp1 = startPt + ( endPt - prevPt ) * (1.0/6);
+				ofPoint cp2 = endPt + ( startPt - nextPt ) * (1.0/6);						
+				
+				
+				//if this is the first line we are drawing 
+				//we have to start the path at a location
+				if( i == 1 ){
+					cairo_move_to( cr, startPt.x, startPt.y );
+					bShouldClose = true;
+				}
+				cairo_curve_to( cr, cp1.x, cp1.y, cp2.x, cp2.y, endPt.x, endPt.y );
+			}						
+		}
 		
+		// need to work on this
+		if(bShouldClose){		
+			
+			
+			bShouldClose = false;
+		}
+		
+		// move to the last point
 		cairo_move_to (cr, lastPoint.x, lastPoint.y);
-		
 		cairo_close_path(cr);
-		cairo_stroke(cr);
+		
+		if(bFill) {
+			cairo_fill( cr );
+		}
+		else {
+			cairo_stroke( cr );
+		}
+		
+		
+		//we want to clear all the vertices
+		//otherwise we keep adding points from
+		//the previous file - cool but not what we want!
+		clearAllVertices();
+		
 	}
 }
 
 // -----------------------
 void ofxCairo::vertex(float x, float y) {
-	ofVertex(x, y);
+	
+	if(bDraw) ofVertex(x, y);
+	
 	if(bOutput) {
-		if(bFirstPoint) {
+		
+		//clear curve vertices
+		if(whichShapeMode == 1){
+			clearAllVertices();	
+		}
+		
+		whichShapeMode = 0;
+		
+		if(bFirstPoint){
 			cairo_move_to (cr, x, y);
 			bFirstPoint = false;
+			bShouldClose = true;
+		}else{
+			cairo_line_to (cr, x, y);
 		}
-		cairo_line_to (cr, x, y);
+		
 		lastPoint.set(x, y);
 		
 	}
 }
+
+// -----------------------
+void ofxCairo::curveVertex(float x, float y) {
+	if(bDraw){
+		ofCurveVertex(x, y);
+	}
+	if(bOutput){
+		
+		whichShapeMode = 1;
+		
+		double* point = new double[2];
+		point[0] = x;
+		point[1] = y;
+		curvePts.push_back(point);
+	}
+}
+
+//----------------------------------------------------------	
+//this takes three arguments as it is based off the idea that at least one 
+//inital polyVertex has already been set. 					
+void ofxCairo::bezierVertex(float x1, float y1, float x2, float y2, float x3, float y3){
+	if(bDraw){
+		ofBezierVertex(x1, y1, x2, y2, x3, y3);
+	}
+	if(bOutput){
+		
+		//clear curve vertices
+		if(whichShapeMode == 1){
+			clearAllVertices();	
+		}
+		
+		whichShapeMode = 2;					
+		
+		//we can only add a bezier curve if the curve
+		//has started with a polyVertex
+		//so as long as this is not the first point we add it
+		if(!bFirstPoint){
+			cairo_curve_to( cr, x1, y1, x2, y2, x3, y3);
+		}
+		
+	}
+}	
 
 // -----------------------
 void ofxCairo::bezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
@@ -144,7 +277,7 @@ void ofxCairo::bezier(float x1, float y1, float x2, float y2, float x3, float y3
 		ofBezier(x1, y1, x2, y2, x3, y3, x4, y4);
 	}
 	if(bOutput){
-	
+		
 		cairo_move_to( cr, x1, y1 );
 		cairo_curve_to( cr, x2, y2, x3, y3, x4, y4);
 		
@@ -316,49 +449,33 @@ void ofxCairo::setColor(int r, int g, int b, int a) {
 
 // -----------------------
 void ofxCairo::circle(float x, float y, float radius) {
-	ofEnableAlphaBlending();
-	cairo_new_sub_path( cr );
-	
+	if(bDraw) {
+		ofFill();
+		ofCircle(x, y, radius);
+		
+		if(bStroke) {
+			ofNoFill();
+			ofSetColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.a);
+			ofCircle(x, y, radius);
+		}
+	}
 	if(bOutput) {
+		cairo_new_sub_path( cr );
 		arc( x, y, radius, 0, TWO_PI);	
 	}
 	
-	ofFill();
-	ofCircle(x, y, radius);
-	
-	if(bStroke) {
-		ofNoFill();
-		ofSetColor(strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.a);
-		ofCircle(x, y, radius);
-	}
-	ofDisableAlphaBlending();
 }
+
 
 // -----------------------
-void ofxCairo::begin() {
-	bOutput = true;
-	
-	// draw the background
-	if(bOutput) {
-		float * bgColor = ofBgColorPtr();
-		cairo_set_source_rgb(cr, bgColor[0], bgColor[1], bgColor[2]);
-		cairo_paint( cr );
+void ofxCairo::clearAllVertices(){
+	for(vector<double*>::iterator itr=curvePts.begin();
+		itr!=curvePts.end();
+		++itr){
+		delete [] (*itr);
 	}
-	ofEnableAlphaBlending();
-}
-void ofxCairo::end(string filename) {
-	
-	cairo_save (cr);
-	bOutput = false;
-	
-	//snippet_do (cr, no, width, HEIGHT);
-	//cairo_show_page (cr);
-	//cairo_restore (cr);
-	
-	printf("PDF Saved...\n");
-	ofDisableAlphaBlending();
-}
-
+	curvePts.clear();
+}	
 
 
 
