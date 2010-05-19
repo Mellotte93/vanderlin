@@ -19,7 +19,8 @@ class ofxBox2d {
 private:
 	
 	float				fps;
-	
+	int					velocityIterations;
+	int					positionIterations;
 public:
 	
 	b2AABB				worldAABB;
@@ -47,9 +48,20 @@ public:
 	void		init();
 	void		setFPS(float theFps) { fps = theFps; }
 	
+#ifdef TARGET_OF_IPHONE
+	void		touchDown(ofTouchEventArgs &touch);
+	void		touchMoved(ofTouchEventArgs &touch);
+	void		touchUp(ofTouchEventArgs &touch);
+#else
 	void		mousePressed(ofMouseEventArgs &e);
 	void		mouseDragged(ofMouseEventArgs &e);
 	void		mouseReleased(ofMouseEventArgs &e);
+#endif
+	
+	void		registerGrabbing();
+	void		grabShapeDown(float x, float y);
+	void		grabShapeUp(float x, float y);
+	void		grabShapeDragged(float x, float y);
 	
 	b2World*	getWorld()		  { return world;				   }
 	int			getBodyCount()    { return world->GetBodyCount();  }
@@ -60,6 +72,7 @@ public:
 	
 	void		setContactListener(ofxBox2dContactListener * listener);
 	
+	void setIterations(int velocityTimes, int positionTimes);
 	void setGravity(float x, float y);
 	void setGravity(ofPoint pt);
 	void setBounds(ofPoint lowBounds, ofPoint upBounds);
@@ -69,5 +82,5 @@ public:
 	
 	void update(); 
 	void draw();
-	
+	void drawGround();
 };

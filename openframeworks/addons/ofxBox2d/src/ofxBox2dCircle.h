@@ -39,17 +39,18 @@ public:
 		bodyDef.position.Set(x/OFX_BOX2D_SCALE, y/OFX_BOX2D_SCALE);	
 		
 		body = world->CreateBody(&bodyDef);
-		body->SetLinearVelocity(b2Vec2(0.0, 0.0));
-		body->CreateShape(&circle);
-		body->SetMassFromShapes();
-	
+		if(body) {
+			body->SetLinearVelocity(b2Vec2(0.0, 0.0));
+			body->CreateShape(&circle);
+			body->SetMassFromShapes();
+		}
 		// anything that you need called
 		init();
 	}
 	
 	//------------------------------------------------
 	float getRadius() {
-		if(body) {
+		if(body != NULL) {
 			b2Shape* shape		= body->GetShapeList();
 			b2CircleShape *data = (b2CircleShape*)shape;
 			return data->GetRadius() * OFX_BOX2D_SCALE;
@@ -59,22 +60,24 @@ public:
 	
 	//------------------------------------------------
 	float getRotation() {
-		
-		const  b2XForm& xf	= body->GetXForm();
-		float  r			= getRadius()/OFX_BOX2D_SCALE;
-		b2Vec2 a			= xf.R.col1;
-		b2Vec2 p1			= body->GetPosition();
-		b2Vec2 p2			= p1 + r * a;
-		
-		float dx = p2.x+r/2 - p1.x+r/2;
-		float dy = p2.y - p1.y;
-		return ofRadToDeg(atan2(dy, dx));
-		
+		if(body != NULL) {
+			const  b2XForm& xf	= body->GetXForm();
+			float  r			= getRadius()/OFX_BOX2D_SCALE;
+			b2Vec2 a			= xf.R.col1;
+			b2Vec2 p1			= body->GetPosition();
+			b2Vec2 p2			= p1 + r * a;
+			
+			float dx = p2.x+r/2 - p1.x+r/2;
+			float dy = p2.y - p1.y;
+			return ofRadToDeg(atan2(dy, dx));
+		}
 	}
 	
 	//------------------------------------------------ 
 	void disableCollistion() {
-		circle.filter.maskBits = 0x0;		
+		if(body != NULL) {
+			circle.filter.maskBits = 0x0;		
+		}
 	}
 	
 	//------------------------------------------------
@@ -87,26 +90,27 @@ public:
 	 
 	 */
 	void setRadius(float r) {
-		
-		for(b2Shape* s=body->GetShapeList(); s; s=s->GetNext()) {
-			body->DestroyShape(s);
+		if(body != NULL) {
+			for(b2Shape* s=body->GetShapeList(); s; s=s->GetNext()) {
+				body->DestroyShape(s);
+			}
+			
+			circle.radius	    = r/OFX_BOX2D_SCALE;
+			circle.density		= mass;
+			circle.restitution  = bounce;
+			circle.friction		= friction;
+			
+			//body = world->CreateBody(&bodyDef);
+			body->SetLinearVelocity(b2Vec2(0.0, 0.0));
+			body->CreateShape(&circle);
+			body->SetMassFromShapes();
 		}
-		
-		circle.radius	    = r/OFX_BOX2D_SCALE;
-		circle.density		= mass;
-		circle.restitution  = bounce;
-		circle.friction		= friction;
-		
-		//body = world->CreateBody(&bodyDef);
-		body->SetLinearVelocity(b2Vec2(0.0, 0.0));
-		body->CreateShape(&circle);
-		body->SetMassFromShapes();
-		
 	}
 	
 	//------------------------------------------------
 	virtual void draw() {
-		if(dead && !body) return;
+		
+		if(dead && body == NULL) return;
 		
 		float radius = getRadius();
 		
@@ -141,10 +145,8 @@ public:
 		b2Vec2	p			= center + radius/OFX_BOX2D_SCALE * axis;
 		
 		ofSetColor(0xff00ff);
-		glBegin(GL_LINES);
-		glVertex2f(getPosition().x, getPosition().y);
-		glVertex2f(p.x*OFX_BOX2D_SCALE, p.y*OFX_BOX2D_SCALE);
-		glEnd();
+		ofLine(getPosition().x, getPosition().y, p.x*OFX_BOX2D_SCALE, p.y*OFX_BOX2D_SCALE);
+		
 	}
 	
 };

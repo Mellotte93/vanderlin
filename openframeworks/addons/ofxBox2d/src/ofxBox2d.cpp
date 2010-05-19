@@ -18,6 +18,8 @@ void ofxBox2d::init() {
 	//gravity
 	gravity.set(0, 5.0f);
 	setFPS(60.0);
+	velocityIterations = 40;
+	positionIterations = 20;
 	
 	//mouse grabbing
 	mouseJoint = NULL;
@@ -34,12 +36,7 @@ void ofxBox2d::init() {
 	world->SetDebugDraw(&debugRender);
 	
 	
-	float bw = ofGetWidth()/scale;
 	ofLog(OF_LOG_NOTICE, "- Box2D Created -\n");
-	
-	ofAddListener(ofEvents.mousePressed, this, &ofxBox2d::mousePressed);
-	ofAddListener(ofEvents.mouseDragged, this, &ofxBox2d::mouseDragged);
-	ofAddListener(ofEvents.mouseReleased, this, &ofxBox2d::mouseReleased);
 	
 	bWorldCreated = true;
 	
@@ -58,11 +55,45 @@ void ofxBox2d::setContactListener(ofxBox2dContactListener * listener) {
 	}
 }
 
-// ------------------------------------------------------ grab shapes 
+// ------------------------------------------------------ grab shapes Events
+void ofxBox2d::registerGrabbing() {
+#ifdef TARGET_OF_IPHONE
+	ofAddListener(ofEvents.touchDown, this, &ofxBox2d::touchDown);
+	ofAddListener(ofEvents.touchMoved, this, &ofxBox2d::touchMoved);
+	ofAddListener(ofEvents.touchUp, this, &ofxBox2d::touchUp);
+#else
+	ofAddListener(ofEvents.mousePressed, this, &ofxBox2d::mousePressed);
+	ofAddListener(ofEvents.mouseDragged, this, &ofxBox2d::mouseDragged);
+	ofAddListener(ofEvents.mouseReleased, this, &ofxBox2d::mouseReleased);
+#endif
+}
+
+#ifdef TARGET_OF_IPHONE
+void ofxBox2d::touchDown(ofTouchEventArgs &touch) {
+	grabShapeDown(touch.x, touch.y);
+}
+void ofxBox2d::touchMoved(ofTouchEventArgs &touch) {
+	grabShapeDragged(touch.x, touch.y);
+}
+void ofxBox2d::touchUp(ofTouchEventArgs &touch) {
+	grabShapeUp(touch.x, touch.y);
+}
+#else
 void ofxBox2d::mousePressed(ofMouseEventArgs &e) {
-	
+	grabShapeDown(e.x, e.y);
+}
+void ofxBox2d::mouseDragged(ofMouseEventArgs &e) {
+	grabShapeDragged(e.x, e.y);
+}
+void ofxBox2d::mouseReleased(ofMouseEventArgs &e) {
+	grabShapeUp(e.x, e.y);
+}
+#endif;
+
+// ------------------------------------------------------ 
+void ofxBox2d::grabShapeDown(float x, float y) {
 	if(bEnableGrabbing) {
-		b2Vec2 p(e.x/OFX_BOX2D_SCALE, e.y/OFX_BOX2D_SCALE);
+		b2Vec2 p(x/OFX_BOX2D_SCALE, y/OFX_BOX2D_SCALE);
 		
 		if (mouseJoint != NULL) {
 			return;
@@ -111,17 +142,18 @@ void ofxBox2d::mousePressed(ofMouseEventArgs &e) {
 		}
 	}
 }
-void ofxBox2d::mouseDragged(ofMouseEventArgs &e) {
-	b2Vec2 p(e.x/OFX_BOX2D_SCALE, e.y/OFX_BOX2D_SCALE);
-	if (mouseJoint && bEnableGrabbing) mouseJoint->SetTarget(p);
-}
-void ofxBox2d::mouseReleased(ofMouseEventArgs &e) {
+void ofxBox2d::grabShapeUp(float x, float y) {
 	
 	if(mouseJoint && bEnableGrabbing) {
 		world->DestroyJoint(mouseJoint);
 		mouseJoint = NULL;
 	}
 }
+void ofxBox2d::grabShapeDragged(float x, float y) {
+	b2Vec2 p(x/OFX_BOX2D_SCALE, y/OFX_BOX2D_SCALE);
+	if (mouseJoint && bEnableGrabbing) mouseJoint->SetTarget(p);
+}
+
 
 // ------------------------------------------------------ set gravity
 void ofxBox2d::setGravity(float x, float y) {
@@ -172,7 +204,8 @@ void ofxBox2d::createBounds(float x, float y, float w, float h) {
 	sd.density = 0.0f;
 	sd.restitution = 0.0f;
 	sd.friction = 0.6;
-	float thick = 30/OFX_BOX2D_SCALE;
+	float thick = 10/OFX_BOX2D_SCALE;
+	
 	// w h x y r 
 	//right
 	sd.SetAsBox(thick, (h/OFX_BOX2D_SCALE)/2, b2Vec2((w/OFX_BOX2D_SCALE), (h/OFX_BOX2D_SCALE)/2), 0.0);
@@ -192,6 +225,13 @@ void ofxBox2d::createBounds(float x, float y, float w, float h) {
 void ofxBox2d::checkBounds(bool b) {
 	bCheckBounds = b;
 }
+
+// ------------------------------------------------------ 
+void ofxBox2d::setIterations(int velocityTimes, int positionTimes) {
+	velocityIterations = velocityTimes;
+	positionIterations = positionTimes;
+}
+
 
 // ------------------------------------------------------ 
 void ofxBox2d::update() {
@@ -235,11 +275,36 @@ void ofxBox2d::update() {
 	}
 	
 	float	timeStep		   = (1.0f / fps);
-	int		velocityIterations = 40;
-	int		positionIterations = 20;
-	
 	world->Step(timeStep, velocityIterations, positionIterations);
 	world->Validate();	
+	
+}
+
+// ------------------------------------------------------ 
+void ofxBox2d::drawGround() {
+	
+	//draw the ground
+	if(ground != NULL) {
+		for(b2Shape* s=ground->GetShapeList(); s; s=s->GetNext()) {
+			
+			const b2XForm& xf = ground->GetXForm();		
+			b2PolygonShape* poly = (b2PolygonShape*)s;
+			int count = poly->GetVertexCount();
+			const b2Vec2* verts = poly->GetVertices();
+			ofEnableAlphaBlending();
+			ofFill();
+			ofSetColor(90, 90, 90, 100);
+			ofBeginShape();
+			for(int j=0; j<count; j++) {
+				
+				b2Vec2 pt = b2Mul(xf, verts[j]);
+				
+				ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
+			}
+			ofEndShape();
+			ofDisableAlphaBlending();
+		}
+	}
 	
 }
 
@@ -266,27 +331,6 @@ void ofxBox2d::draw() {
 		ofDisableAlphaBlending();
 	}
 	
-	//draw the ground
-	if(ground) {
-		for(b2Shape* s=ground->GetShapeList(); s; s=s->GetNext()) {
-			
-			const b2XForm& xf = ground->GetXForm();		
-			b2PolygonShape* poly = (b2PolygonShape*)s;
-			int count = poly->GetVertexCount();
-			const b2Vec2* verts = poly->GetVertices();
-			ofEnableAlphaBlending();
-			ofFill();
-			ofSetColor(90, 90, 90, 100);
-			ofBeginShape();
-			for(int j=0; j<count; j++) {
-				
-				b2Vec2 pt = b2Mul(xf, verts[j]);
-				
-				ofVertex(pt.x*OFX_BOX2D_SCALE, pt.y*OFX_BOX2D_SCALE);
-			}
-			ofEndShape();
-			ofDisableAlphaBlending();
-		}
-	}
+	drawGround();
 }
 
