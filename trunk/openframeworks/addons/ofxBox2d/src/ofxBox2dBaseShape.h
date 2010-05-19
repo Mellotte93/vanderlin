@@ -202,6 +202,16 @@ public:
 				body->ApplyForce(F, P);
 			}
 		}*/
+		
+		if(body != NULL) {
+			b2Vec2 P(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE);
+			b2Vec2 D = P - body->GetPosition(); 
+			if(D.LengthSquared() < radius) {;
+				P.Normalize();
+				b2Vec2 F = amt * D;
+				body->ApplyForce(-F, P);
+			}
+		}
 	}
 	
 	virtual void addAttractionPoint(float x, float y, float amt, float minDis=NULL) {

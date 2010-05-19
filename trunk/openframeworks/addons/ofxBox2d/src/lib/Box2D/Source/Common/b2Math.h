@@ -20,12 +20,7 @@
 #define B2_MATH_H
 
 #include "b2Settings.h"
-
-#ifdef TARGET_OS_IPHONE
-#include "math.h"
-#else
-#include <cmath>
-#endif
+#include <math.h>
 
 
 
@@ -70,11 +65,8 @@ inline bool b2IsValid(float32 x)
 	return _finite(x) != 0;
 #else
 	
-#ifdef TARGET_OS_IPHONE
+
 	return isfinite(x);
-#else
-	return finite(x) != 0;
-#endif
 	
 	
 #endif
