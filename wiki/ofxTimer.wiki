@@ -1,2 +1,0 @@
-This is a simple timer class that allows you to set time timer intervals in seconds and to allow looping or not. Using poco you can simply listen for the timer event and trigger and function you would like.
-
